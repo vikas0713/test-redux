@@ -1,95 +1,70 @@
-export const INCREMENT_REQUESTED = 'counter/INCREMENT_REQUESTED'
-export const INCREMENT = 'counter/INCREMENT'
-export const DECREMENT_REQUESTED = 'counter/DECREMENT_REQUESTED'
-export const DECREMENT = 'counter/DECREMENT'
+import { getListApi } from '../Apiutils';
+
+export const GET_LIST_REQUEST = 'counter/get_list_request'
+export const GET_LIST_RESULT = 'counter/get_list_result'
+export const GET_LIST_ERROR = 'counter/get_list_error'
+
+export const getList = () => {
+  return dispatch => {
+    dispatch ({
+      type: GET_LIST_REQUEST
+    })
+    return getListApi()
+    .then(resp => dispatch(getListSuccess(resp)))
+    .catch(error => dispatch(getListFail(error)))
+  }
+}
+
+export const getListSuccess = (resp) => {
+  return dispatch => {
+    dispatch ({
+      type: GET_LIST_RESULT,
+      payload: resp.data
+    })
+  }
+}
+
+export const getListFail = (error) => {
+  return dispatch => {
+    dispatch ({
+      type: GET_LIST_RESULT,
+
+    })
+  }
+}
+
+const Actions = {
+  getList
+}
+
+const ACTION_HANDLERS = {
+  [GET_LIST_REQUEST] : (state,action) => {
+    return {
+      ...state,
+      carList: {}
+    }
+  },
+  [GET_LIST_RESULT] : (state,action) => {
+    return {
+      ...state,
+      carList: action.payload
+    }
+  },
+  [GET_LIST_ERROR] : (state,action) => {
+    return {
+      ...state,
+      error: action.payload
+    }
+  },
+}
 
 const initialState = {
-  count: 0,
-  isIncrementing: false,
-  isDecrementing: false
-}
+  carList: []
+};
 
-export default (state = initialState, action) => {
-  switch (action.type) {
-    case INCREMENT_REQUESTED:
-      return {
-        ...state,
-        isIncrementing: true
-      }
 
-    case INCREMENT:
-      return {
-        ...state,
-        count: state.count + 1,
-        isIncrementing: !state.isIncrementing
-      }
+export default function counter(state = initialState, action = {}) {
+  const handler = ACTION_HANDLERS[action.type]
 
-    case DECREMENT_REQUESTED:
-      return {
-        ...state,
-        isDecrementing: true
-      }
-
-    case DECREMENT:
-      return {
-        ...state,
-        count: state.count - 1,
-        isDecrementing: !state.isDecrementing
-      }
-
-    default:
-      return state
-  }
-}
-
-export const increment = () => {
-  return dispatch => {
-    dispatch({
-      type: INCREMENT_REQUESTED
-    })
-
-    dispatch({
-      type: INCREMENT
-    })
-  }
-}
-
-export const incrementAsync = () => {
-  return dispatch => {
-    dispatch({
-      type: INCREMENT_REQUESTED
-    })
-
-    return setTimeout(() => {
-      dispatch({
-        type: INCREMENT
-      })
-    }, 3000)
-  }
-}
-
-export const decrement = () => {
-  return dispatch => {
-    dispatch({
-      type: DECREMENT_REQUESTED
-    })
-
-    dispatch({
-      type: DECREMENT
-    })
-  }
-}
-
-export const decrementAsync = () => {
-  return dispatch => {
-    dispatch({
-      type: DECREMENT_REQUESTED
-    })
-
-    return setTimeout(() => {
-      dispatch({
-        type: DECREMENT
-      })
-    }, 3000)
-  }
+  return handler ? handler(state, action) : state
 }
